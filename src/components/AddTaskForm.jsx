@@ -1,12 +1,53 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import "./AddTaskForm.css";
 
-const AddTaskForm = () => {
-  const [inputValues, setInputValues] = useState({ name: "", description: "" });
+// AddTaskForm component
+const AddTaskForm = ({ addTask, taskToEdit }) => {
+  const [inputValues, setInputValues] = useState({
+    name: "",
+    description: "",
+    completed: false,
+    id: new Date().getTime(),
+  });
+
+  // useEffect to set the input values when taskToEdit is passed
+  useEffect(() => {
+    if (taskToEdit) {
+      setInputValues(taskToEdit);
+    }
+  }, [taskToEdit]);
+
+  // Function to validate the input fields
+  const handleValidation = (task) => {
+    if (task.name === "" || task.description === "") {
+      toast("Fields cannot be empty");
+      return false;
+    }
+    return true;
+  };
+
+  // Function to submit the form
   const submitHandler = (e) => {
     e.preventDefault();
     console.log(inputValues);
+    const success = handleValidation(inputValues);
+    if (!success) {
+      return;
+    }
+    setInputValues({ ...inputValues, id: new Date().getTime() });
+    addTask(inputValues);
+    let message = taskToEdit
+      ? "Task updated Successfully"
+      : "Task added Successfully";
+    toast(message);
+    setInputValues({
+      name: "",
+      description: "",
+      completed: false,
+      id: new Date().getTime(),
+    });
   };
   return (
     <form className="form-container" onSubmit={submitHandler}>
@@ -31,9 +72,12 @@ const AddTaskForm = () => {
           }}
         ></textarea>
       </div>
-      <button className="add-btn">Add Task</button>
+      <button className="add-btn">
+        {taskToEdit ? `Add Edited Task` : `Add New Task`}
+      </button>
     </form>
   );
 };
 
+// Export AddTaskForm component
 export default AddTaskForm;
